@@ -1,41 +1,34 @@
-<!-- BEGIN MICROSOFT SECURITY.MD V0.0.8 BLOCK -->
+# Security
 
-## Security
+This repository is a fork maintained by Freytag & Company, LLC. It contains two kinds of code, and
+security reports go to different places depending on which kind is affected.
 
-Microsoft takes the security of our software products and services seriously, which includes all source code repositories managed through our GitHub organizations, which include [Microsoft](https://github.com/microsoft), [Azure](https://github.com/Azure), [DotNet](https://github.com/dotnet), [AspNet](https://github.com/aspnet), [Xamarin](https://github.com/xamarin), and [our GitHub organizations](https://opensource.microsoft.com/).
+## Vulnerabilities in the modifications made by this fork
 
-If you believe you have found a security vulnerability in any Microsoft-owned repository that meets [Microsoft's definition of a security vulnerability](https://aka.ms/opensource/security/definition), please report it to us as described below.
+**Report these to [team@freytag.us](mailto:team@freytag.us).** Please do not open a public issue.
 
-## Reporting Security Issues
+The modifications are listed in [NOTICE](./NOTICE) and described under *Fixes in this fork* in the
+[README](./README.md#fixes-in-this-fork). They include changes to the bearer-token validation in
+`src/check-token.ts`, so they are security-relevant. Freytag & Company, LLC is solely responsible
+for them; Microsoft has not reviewed them.
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+Include the version or commit, steps to reproduce, and the impact you believe it has.
 
-Instead, please report them to the Microsoft Security Response Center (MSRC) at [https://msrc.microsoft.com/create-report](https://aka.ms/opensource/security/create-report).
+## Vulnerabilities in the original Microsoft code
 
-If you prefer to submit without logging in, send email to [secure@microsoft.com](mailto:secure@microsoft.com).  If possible, encrypt your message with our PGP key; please download it from the [Microsoft Security Response Center PGP Key page](https://aka.ms/opensource/security/pgpkey).
+Code inherited unchanged from the upstream repository remains Microsoft's, and Microsoft's own
+process for its open-source repositories is the
+[Microsoft Security Response Center](https://aka.ms/opensource/security/create-report)
+(email [secure@microsoft.com](mailto:secure@microsoft.com)). **Be aware that Microsoft archived
+the upstream repository in September 2026**, so a report there may not be acted on. You are
+welcome to copy [team@freytag.us](mailto:team@freytag.us) so that this fork can carry a fix regardless.
 
-You should receive a response within 24 hours. If for some reason you do not, please follow up via email to ensure we received your original message. Additional information can be found at [microsoft.com/msrc](https://aka.ms/opensource/security/msrc). 
+## Scope and expectations
 
-Please include the requested information listed below (as much as you can provide) to help us better understand the nature and scope of the possible issue:
+This emulator is a development tool intended to run on a developer's own machine or in a private
+environment. It deliberately relaxes several controls to make local testing easy — see
+*Limitations* in the README, in particular the `x-ignore-auth` bypass and
+`NODE_TLS_REJECT_UNAUTHORIZED=0`. Those are documented behaviours, not vulnerabilities, but they
+mean the emulator should not be exposed to untrusted networks.
 
-  * Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
-  * Full paths of source file(s) related to the manifestation of the issue
-  * The location of the affected source code (tag/branch/commit or direct URL)
-  * Any special configuration required to reproduce the issue
-  * Step-by-step instructions to reproduce the issue
-  * Proof-of-concept or exploit code (if possible)
-  * Impact of the issue, including how an attacker might exploit the issue
-
-This information will help us triage your report more quickly.
-
-If you are reporting for a bug bounty, more complete reports can contribute to a higher bounty award. Please visit our [Microsoft Bug Bounty Program](https://aka.ms/opensource/security/bounty) page for more details about our active programs.
-
-## Preferred Languages
-
-We prefer all communications to be in English.
-
-## Policy
-
-Microsoft follows the principle of [Coordinated Vulnerability Disclosure](https://aka.ms/opensource/security/cvd).
-
-<!-- END MICROSOFT SECURITY.MD BLOCK -->
+Please do not report security vulnerabilities through public GitHub issues.

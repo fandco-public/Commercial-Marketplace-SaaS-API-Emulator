@@ -1,0 +1,56 @@
+NOTICE
+
+This repository is a modified fork of
+
+    microsoft/Commercial-Marketplace-SaaS-API-Emulator
+    https://github.com/microsoft/Commercial-Marketplace-SaaS-API-Emulator
+
+which Microsoft archived in September 2026.
+
+ORIGINAL WORK
+    Copyright (c) Microsoft Corporation.
+    Licensed under the MIT License (see LICENSE).
+
+MODIFICATIONS
+    Copyright (c) 2026 Freytag & Company, LLC.
+    Licensed under the same MIT License (see LICENSE).
+
+    The modifications are the work and responsibility of Freytag & Company, LLC.
+    Microsoft has not reviewed, endorsed or supported them. They are:
+
+    1. docker/Dockerfile, .github/workflows/pull-request.yml
+       Removed the unpinned "npm install -g npm", which pulled an npm requiring
+       Node 22+ into an image pinned to Node 18 and broke the build; copied
+       jest.config.json so the image can run its own tests; added a Docker
+       build step to pull-request CI.
+
+    2. src/check-token.ts, src/__tests__/check-token.test.ts
+       Read the standard Authorization header rather than the non-standard
+       Authentication header, so REQUIRE_AUTH=true no longer rejects every
+       correct client. Added the middleware's first tests.
+
+    3. src/check-token.ts, src/__tests__/check-token.test.ts
+       Stopped an unresolvable signing key from terminating the process;
+       return 500 rather than 403 when the check cannot be performed; cache
+       signing keys.
+
+    4. src/index.ts, src/client/index.js, src/utility-apis.ts
+       Made the landing page default a relative path, so it is correct at any
+       published host port.
+
+    5. src/subscription-api-impl.ts, src/__tests__/subscription-api-activate-term.test.ts
+       Fixed the subscription term start date, which was set one term in the
+       future.
+
+    6. src/helpers/queue-helper.ts, src/__tests__/queue-helper-renew.test.ts
+       Made Renew advance the subscription term instead of silently doing
+       nothing. The behaviour is inferred, not documented by Microsoft.
+
+    Plus corrections to README.md, SUPPORT.md, SECURITY.md, CODE_OF_CONDUCT.md,
+    docs/*.md, rest_calls/*.http and a source comment, as recorded in the
+    repository history.
+
+TRADEMARKS
+    "Microsoft" and "Azure" are trademarks of the Microsoft group of companies.
+    Their use here identifies the origin of the original work and the APIs the
+    emulator imitates. It does not imply Microsoft sponsorship of this fork.
