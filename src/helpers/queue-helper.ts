@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { ServicesContainer } from '../services/container';
 import { Operation, OperationStatus, SetTimeoutHandler } from '../types';
 
@@ -59,7 +60,36 @@ export const queueSubscriptionUpdate = async (services: ServicesContainer, opera
             delete subscription.quantity;
             break;
           case 'Renew':
-            // ?
+            // INFERRED BEHAVIOUR, not observed against the real marketplace.
+            //
+            // Microsoft does not document what a renewal does to the term, which is
+            // why this was previously left empty with a '// ?'. The emulator then
+            // accepted a Renew, fired a webhook, reported success and changed
+            // nothing - a silent no-op, which is worse than an honest gap because a
+            // consumer testing its own Renew handler has nothing to verify against.
+            //
+            // The assumption taken here is the natural reading of a renewal: the new
+            // term begins where the old one ended, and runs for one more termUnit.
+            // Treat it as a plausible simulation rather than documented behaviour,
+            // and verify against the real API before relying on it.
+            //
+            // clone() matters: moment's add() mutates in place and returns the same
+            // object, so a start and end derived from one moment end up identical.
+            if (subscription.term?.endDate !== undefined) {
+              const renewalStart = moment(subscription.term.endDate);
+
+              subscription.term.startDate = renewalStart.toDate();
+              subscription.term.endDate = renewalStart
+                .clone()
+                .add(subscription.term.termUnit)
+                .toDate();
+            } else {
+              // No end date to renew from - the subscription was never activated.
+              services.logger.log(
+                `Renew on a subscription with no term end date: ${subscription.id}`,
+                'State Store'
+              );
+            }
             break;
           case 'Suspend':
             subscription.saasSubscriptionStatus = 'Suspended';
