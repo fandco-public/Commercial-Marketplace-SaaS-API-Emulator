@@ -168,7 +168,13 @@ async function postToLanding() {
 
     const target = landingPage + '?token=' + base64;
 
-    if (config.landingPageUrl.toLowerCase().startsWith(window.location.origin.toLowerCase())) {
+    // A relative landing page is by definition on this origin, so navigate
+    // rather than opening a new tab.
+    const sameOrigin =
+        landingPage.startsWith('/') ||
+        config.landingPageUrl.toLowerCase().startsWith(window.location.origin.toLowerCase());
+
+    if (sameOrigin) {
         window.location.href = target;
     }
     else {

@@ -104,11 +104,15 @@ const configure: (app: Express, services: ServicesContainer) => void = (app, ser
   app.patch('/api/util/config', (async (req, res) => {
     for (const i in req.body) {
       if (Object.prototype.hasOwnProperty.call(services.config, i)) {
-        // If it's the webhookUrl/landingPageUrl being set, a relative path wont work
+        // The webhook is called by the emulator itself, so it must be fully
+        // qualified - a relative path is meaningless server side. The landing
+        // page is opened by the browser, which resolves a relative path
+        // against this origin, and that is now the default.
         if (i === 'webhookUrl' || i === 'landingPageUrl') {
           const url = req.body[i] as string;
-          if (!url.startsWith('http')) {
-            res.status(400).send('URLs must be a fully qualified.');
+          const relativeAllowed = i === 'landingPageUrl' && url.startsWith('/');
+          if (!relativeAllowed && !url.startsWith('http')) {
+            res.status(400).send('URLs must be fully qualified, except a landing page path beginning with /.');
             return;
           }
         }

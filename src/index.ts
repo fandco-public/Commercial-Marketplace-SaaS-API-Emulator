@@ -55,7 +55,11 @@ if (publisherId !== undefined && (publisherTenantId !== undefined || publisherAp
 } else {
   const config: Config = {
     webhookUrl: process.env.WEBHOOK_URL ?? `http://localhost:${port}/webhook`,
-    landingPageUrl: process.env.LANDING_PAGE_URL ?? `http://localhost:${port}/landing.html`,
+    // Relative on purpose. The browser opens this address and resolves it
+    // against the emulator's own origin, so it is correct whatever host port
+    // the container is published on. An absolute default built from `port`
+    // is wrong whenever those differ, e.g. `docker run -p 8080:80`.
+    landingPageUrl: process.env.LANDING_PAGE_URL ?? '/landing.html',
     operationTimeoutMS: durationToMS(process.env.OPERATION_TIMEOUT as string),
     subscriptionUpdateDelayMS: durationToMS(process.env.SUBSCRIPTION_UPDATE_DELAY as string),
     webhookCallDelayMS: durationToMS(process.env.WEBHOOK_CALL_DELAY as string),
