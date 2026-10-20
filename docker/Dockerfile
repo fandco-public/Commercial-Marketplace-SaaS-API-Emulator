@@ -7,11 +7,11 @@ RUN mkdir -p ./config
 COPY ./src ./src
 COPY ./package* ./
 COPY ./tsconfig.json ./
+COPY ./jest.config.json ./
 
 ENV PORT=80
 
 RUN apk update && apk upgrade
-RUN npm install -g npm
 
 # Docker User Namespace remapping issues in npm 9.x
 # Refer to https://azureossd.github.io/2022/06/30/Docker-User-Namespace-remapping-issues/#npm-specific-issues-causing-userns-remap-exceptions
