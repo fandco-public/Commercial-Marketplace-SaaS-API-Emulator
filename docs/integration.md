@@ -40,7 +40,7 @@ Update the configuration to direct the SaaS Accelerator to the Emulator, by defa
 
 - In the Azure portal select the NAME-portal App Service
 - In the left bar under **Settings** select **Configuration**
-- Click Edit and set the the **SaaSApiConfiguration__FulFillmentAPIBaseURL** value to `YOUR_EMULATOR_URL/api`
+- Click Edit and set the **SaaSApiConfiguration__FulFillmentAPIBaseURL** value to `YOUR_EMULATOR_URL/api`
 - Click Save at the top of the section 
 
 ### **Update the Emulator**
@@ -48,12 +48,20 @@ Now set the Emulator Landing Page to the SaaS Accelerator portal URL:
 - In the Azure portal select the NAME-portal App Service
 - At the **Overview** section you will see the **Default domain** - copy
 - Go to the Emulator Config page
-- Paste the copied **Default domain** and append **/api/azurewebhook** in the **Webhook URL** box and click **Set**
-- Paste the copied **Default domain** into the **Landing Page URL** box and click **Set**
-When you make a puchase through the Marketplace page it will now direct to the SaaS Accelerator
+- In the **Webhook URL** box enter `https://` + the copied **Default domain** +
+  **/api/AzureWebhook**, then click **Set**
+- In the **Landing Page URL** box enter `https://` + the copied **Default domain**, then click
+  **Set**
+
+The `https://` matters. Azure shows the Default domain without a scheme, and the emulator
+rejects any webhook or landing page URL that is not fully qualified, with
+`400 URLs must be fully qualified...`.
+
+When you make a purchase through the Marketplace page it will now direct to the SaaS Accelerator
 
 ### SaaS Accelerator Admin Portal
-You can obtain the admin portal URL from the NAME-portal App Service Default Domain.
+You can obtain the admin portal URL from the **NAME-admin** App Service Default Domain.
+(`NAME-portal` is the landing page, as listed above.)
 
 ### **Important**
 The SaaS Accelerator SQL Database state must match that of the Emulator. If you restart the Emulator or Clear the Data File the two will be out of sync. You can reset the SQL Database state with the following: 
@@ -108,7 +116,7 @@ Update the configuration to direct MONA to the Emulator, by default it is config
 1. The App Service Update
 - In the Azure portal select the mona-web-NAME App Service
 - In the left bar under **Settings** select **Configuration**
-- Click Edit and set the the **Deployment:PartnerCenterApiBaseUrl** value to `YOUR_EMULATOR_URL/api`
+- Click Edit and set the **Deployment:PartnerCenterApiBaseUrl** value to `YOUR_EMULATOR_URL/api`
 - Click Save at the top of the section 
 
 2. Logic App Updates
@@ -124,12 +132,17 @@ Update the configuration to direct MONA to the Emulator, by default it is config
 - Click **Save**
 
 ### **Update the Emulator**
-Now set the Emulator Landing Page to the SaaS Accelerator portal URL:
+Now set the Emulator Landing Page to the MONA web URL:
 - In the Azure portal select the mona-web-NAME App Service
 - At the **Overview** section you will see the **Default domain** - copy
 - Go to the Emulator Config page
-- Paste the copied **Default domain** and append **/webhook** in the **Webhook URL** box and click **Set**
-- Paste the copied **Default domain** into the **Landing Page URL** box and click **Set**
-When you make a puchase through the Marketplace page it will now direct to the SaaS Accelerator
+- In the **Webhook URL** box enter `https://` + the copied **Default domain** + **/webhook**,
+  then click **Set**
+- In the **Landing Page URL** box enter `https://` + the copied **Default domain**, then click
+  **Set**
 
-If you need to check the target URLs you can access in the MONA admin portal at: **Detault domain**/**admin**. To update the original config settings visit **/setup**.
+As above, the `https://` is required: the emulator rejects a URL that is not fully qualified.
+
+When you make a purchase through the Marketplace page it will now direct to MONA
+
+If you need to check the target URLs you can access in the MONA admin portal at: **Default domain**/**admin**. To update the original config settings visit **/setup**.

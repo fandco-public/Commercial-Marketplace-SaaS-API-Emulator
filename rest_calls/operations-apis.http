@@ -1,4 +1,7 @@
 @publisherId=FourthCoffee
+# Set this to match how you are running the emulator:
+#   docker run -p 8080:80 ...  -> http://localhost:8080
+#   npm run start / VS Code    -> http://localhost:3978
 @baseUrl=http://localhost:8080
 @apiVersion=2018-08-31
 @subscription=

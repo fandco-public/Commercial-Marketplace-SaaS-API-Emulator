@@ -35,7 +35,10 @@ For additional configuration options see [configuration examples](./config.md)
   - Ensure port 80 is exposed
 - The emulator will be listening on port 80 on the public IP address of the container instance
 - You will need to update the `LANDING_PAGE_URL` with this IP or FQDN
-  - the default value (`localhost`) only works when running locally
+  - In this fork the default is the relative path `/landing.html`, which the browser resolves
+    against whatever address it reached the emulator on - so it works unchanged in most
+    hosted cases. Set an absolute value only if the browser must be sent somewhere other
+    than the emulator's own origin. (Upstream's default was absolute and did need changing.)
   - eg `LANDING_PAGE_URL=http://1.2.3.4/landing.html`
   - You can set this as an [env variable](./config.md) or through the config UI
 - Consider additional network security measures as this port is open on the internet
@@ -136,9 +139,18 @@ It's important to be aware of this for two specific scenarios which only apply i
 1. Wherever you're developing your application, if the emulator is running in a container, you may find you need to set different `host` / `port` for landing page / webhook in the emulator config if you're using the built-in landing page / webhook. The landing page is accessed from a remote host while the webhook is being called from the emulator. Thus you may find yourself configuring along these lines:
 
     ```text
-    LANDING_PAGE_URL='http://localhost:3978'
-    WEBHOOK_URL='http://emulator:80'
+    LANDING_PAGE_URL='http://localhost:3978/landing.html'
+    WEBHOOK_URL='http://emulator:80/webhook'
     ```
+
+    Note the **paths**. These settings are full URLs, not origins: the emulator serves its
+    landing page at `/landing.html` and its webhook at `POST /webhook`. Omitting the path
+    gives a 404 on the landing page and a refused connection on the webhook.
+
+    Note also that `emulator` here is the container's own hostname on the shared network, so
+    `WEBHOOK_URL` is pointing the emulator at its own built-in webhook. `http://localhost:80/webhook`
+    would be equivalent and simpler; use `emulator` only if something else needs to resolve it
+    by name.
 
 ## Configuring the emulator
 

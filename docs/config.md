@@ -1,5 +1,10 @@
 # Configuring the emulator
 
+> **This fork differs from upstream.** `LANDING_PAGE_URL` now defaults to a relative path, and
+> two errors in this file have been corrected: `SUBSCRIPTION_UPDATE_DELAY`'s stated default, and
+> the claim that plain numeric delay values are seconds. See
+> [Fixes in this fork](../README.md#fixes-in-this-fork).
+
 There are a number of configuration options that can be set on the emulator.
 
 **Common Options**
@@ -9,10 +14,22 @@ There are a number of configuration options that can be set on the emulator.
   - `Default: 3978 (debugger) / 80 (Docker)`
 - WEBHOOK_URL (URL)
   - The URL of your webhook service (by default, set to the emulator built-in implementation)
+  - **Dialled by the emulator itself, from inside the container.** It must therefore be
+    reachable from the container: use `host.docker.internal:[your port]` for a service on the
+    Docker host, not the published port. A relative path is not accepted, because it is
+    meaningless server side
   - `Default: http://localhost:[PORT]/webhook`
-- LANDING_PAGE_URL (URL)
+- LANDING_PAGE_URL (URL or path)
   - The URL of your landing page (by default, set to the emulator built-in implementation)
-  - `Default: http://localhost:[PORT]/landing.html`
+  - **Dialled by the browser, not the emulator.** It must therefore be reachable from wherever
+    the browser runs: use the **published** host port, not the container's `[PORT]`
+  - `Default: /landing.html`
+  - The default is **relative** in this fork. The browser resolves it against the emulator's
+    own origin, so it is correct at any published port. Upstream defaults to
+    `http://localhost:[PORT]/landing.html`, which fails whenever the published port differs
+    from the container port - for example `docker run -p 8080:80` sends the browser to host
+    port 80, where it finds whatever else is listening there
+  - A relative path beginning with `/` is accepted here, including from the `Config` page
 - SKIP_DATA_LOAD (boolean)
   - Tell the emulator not to load any existing data file on startup. This value is only used during startup. Useful for debugging.
   - `Default: false`
@@ -53,24 +70,45 @@ There are some differences between the token sent by Azure Marketplace and the e
 
 **Note:** Advanced Options are there to better simulate the behaviour of the marketplace (the time it takes for operations to complete)
 
+**Units.** A plain numeric value is **milliseconds**, not seconds - `WEBHOOK_CALL_PATCH_DELAY=1`
+is one millisecond. For anything human-scale use an
+[ISO 8601 duration](https://en.wikipedia.org/wiki/ISO_8601#Durations): `PT1S` is one second,
+`PT1M` is one minute. Upstream describes these as "a number of seconds", which is incorrect -
+environment variables arrive as strings and are parsed by `moment.duration`.
+
 - OPERATION_TIMEOUT
   - Operations do not happen immediately. This value defines the time between an operation being submitted and it being completed.
-  - Value is either a [number of seconds] or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
+  - Value is either a number of **milliseconds** or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
   - `Default: 0`
 - SUBSCRIPTION_UPDATE_DELAY
   - Subscription updates do not happen immediately. This value defines the time between an operation completing and the subscription being updated.
-  - Value is either a [number of seconds] or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
-  - `Default: 2000ms`
+  - Value is either a number of **milliseconds** or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
+  - `Default: 0` - upstream documents `2000ms`, but nothing supplies that default. With the
+    variable unset the emulator logs `Updating subscription... [0ms]`
 - WEBHOOK_CALL_DELAY
   - Delay before webhook is called.
-  - Value is either a number of seconds or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
+  - Value is either a number of **milliseconds** or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
   - `Default: 0`
 - WEBHOOK_CALL_PATCH_DELAY
   - Delay after webhook is called before the emulator checks for a patch result.
-  - Value is either a number of seconds or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
+  - Value is either a number of **milliseconds** or a [duration](https://en.wikipedia.org/wiki/ISO_8601#Durations)
   - `Default: 10000ms`
+  - This is the pause you notice after a Suspend, Reinstate or quantity change. The emulator
+    rings the webhook, then waits this long for the receiver to confirm the operation with a
+    `PATCH` before proceeding on its own. The built-in webhook does not confirm - it logs
+    `No patch result configured, skipping patch!` unless `INTERNAL_PATCH_RESULT` is set - so
+    the full delay elapses every time. That pause is the window your real service gets to
+    respond, so it is realistic rather than slow
 - REQUIRE_AUTH
   - Requires a [v1 AAD bearer token](https://learn.microsoft.com/en-us/partner-center/marketplace/partner-center-portal/pc-saas-registration#how-to-get-the-publishers-authorization-token) to be passed in the Authorization header with the resource/audience of the marketplace service (`20e940b3-4c77-4b0b-9a53-9e16a1b010a7`) and issuer as `https://sts.windows.net/{publisher tenant id}/`
+  - **Two defects here are fixed in this fork.** Upstream read the non-standard
+    `Authentication` header, so every correctly-behaving client received a 401; and an
+    unresolvable signing key terminated the process. A failed key lookup now returns 500,
+    separating "we could not perform the check" from "the token is invalid", which still
+    returns 403
+  - Note that any request carrying an `x-ignore-auth` header, with any value, bypasses this
+    check entirely. The emulator's own browser interface relies on that, since a static page
+    cannot perform a client-credentials token exchange
 
 All options can be passed as environment variables. Some can be configured in UI on the `Config` page of the emulator.
 

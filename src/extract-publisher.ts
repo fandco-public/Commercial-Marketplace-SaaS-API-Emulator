@@ -2,8 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { ServicesContainer } from './services/container';
 import { RequestWithPublisher } from './types';
 
-// High-order function to inject ServiceContainer into middleware
-// Express middleware used to authenticate our client requested user token
+// Higher-order function to inject ServicesContainer into the middleware.
+//
+// This does NOT authenticate. It decodes the bearer token without verifying
+// its signature, purely to read the tid and appid claims and build a publisher
+// id - or falls back to the publisherId query string parameter when no token is
+// present. Authentication is check-token.ts's job, and only when REQUIRE_AUTH
+// is set.
 export const extractPublisher = (services: ServicesContainer) => (req: Request, res: Response, next: NextFunction) => {
   const token = getTokenFromHeader(req);
   let publisherId = '';
