@@ -163,10 +163,13 @@ export const activateApi: ApiCall = async (req, res, services) => {
   // Update the term with a start and end date
   // TODO: Figure out the actual term unit and set the dates based on that
 
-  const now = moment();
-  const endMoment = now.add(subscription.term.termUnit);
+  // clone() matters: moment's add() mutates in place and returns the same
+  // object, so `const end = start.add(...)` leaves both names pointing at the
+  // advanced date and the start date lands one term in the future.
+  const startMoment = moment();
+  const endMoment = startMoment.clone().add(subscription.term.termUnit);
 
-  subscription.term.startDate = now.toDate();
+  subscription.term.startDate = startMoment.toDate();
   subscription.term.endDate = endMoment.toDate();
   subscription.saasSubscriptionStatus = 'Subscribed';
 
